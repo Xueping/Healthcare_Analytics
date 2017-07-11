@@ -14,6 +14,7 @@ from sklearn.decomposition import NMF, LatentDirichletAllocation
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 def load_Preprocess():
@@ -82,17 +83,17 @@ def load_Preprocess():
     
     return docs
 
+def display_topics(model, feature_names, no_top_words):
+        for topic_idx, topic in enumerate(model.components_):
+            print "Topic %d:" % (topic_idx)
+            print " ".join([feature_names[i]
+                           for i in topic.argsort()[:-no_top_words - 1:-1]])
+
 def run_Model(documents):
     
 #     no_features = 40
     no_topics = 5
     no_top_words = 5
-    
-    def display_topics(model, feature_names, no_top_words):
-        for topic_idx, topic in enumerate(model.components_):
-            print "Topic %d:" % (topic_idx)
-            print " ".join([feature_names[i]
-                           for i in topic.argsort()[:-no_top_words - 1:-1]])
     
     # NMF is able to use tf-idf
     tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, stop_words='english')
@@ -115,30 +116,60 @@ def run_Model(documents):
     
     
 def statistics(documents):
-    
-#     no_features = 40
+
     no_topics = 5
+    no_top_words = 10
     
     # LDA can only use raw term counts for LDA because it is a probabilistic graphical model
     tf_vectorizer = CountVectorizer(max_df=0.95, min_df=2, stop_words='english')
+    
+    #get document-term matrix, the entry is term frequency in document
     tf = tf_vectorizer.fit_transform(documents)
-    
-    print tf[1:10,]
-    
-    # Run LDA
+
+    #run LDA model to get topics and distribution
     lda = LatentDirichletAllocation(n_topics=no_topics, max_iter=5, learning_method='online', learning_offset=50.,random_state=0).fit(tf)
-    
-    print lda.components_
-    
+
+    #document-topic distribution matrix
     doc_topic_distrib = lda.transform(tf)
-    print doc_topic_distrib[1:10,]
+  
+    #get term name
+    tf_feature_names = tf_vectorizer.get_feature_names()
+    
+    #term-topic distribution matrix
+    term_distrib = tf.transpose()*doc_topic_distrib
+    
+    #Convert numpy ndarray to pandas dataframe and add index
+    indexed_terms = pd.DataFrame(term_distrib, index=tf_feature_names,columns=['topic_1','topic_2','topic_3','topic_4','topic_5'])
+    
+    display_topics(lda, tf_feature_names, no_top_words)
+    
+    
+    age = indexed_terms[indexed_terms.index.str.contains("age_")]
+    age.plot()
+    
+    gender = indexed_terms[indexed_terms.index.str.contains("gender_")]
+    gender.plot()
+    
+    tot_visit = indexed_terms[indexed_terms.index.str.contains("tot_visit_")]
+    tot_visit.plot()
+    
+    latest_adm_year = indexed_terms[indexed_terms.index.str.contains("latest_adm_year_")]
+    latest_adm_year.plot()
+    
+    latest_adm_month = indexed_terms[indexed_terms.index.str.contains("latest_adm_month_")]
+    latest_adm_month.plot()
+    
+    latest_hospital_service = indexed_terms[indexed_terms.index.str.contains("latest_hospital_service_")]
+    latest_hospital_service.plot()
+    plt.show()
 
 
 if __name__ == "__main__":
 
 #     documents = load_Preprocess()
     
-    with open('transformedDoc.txt') as f:
+#     with open('transformedDoc.txt') as f:
+    with open('sampleDoc.txt') as f:
         content = f.readlines()
         # you may also want to remove whitespace characters like `\n` at the end of each line
         documents = [x.strip() for x in content] 
