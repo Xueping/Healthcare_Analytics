@@ -1,7 +1,7 @@
 '''
 Created on Jun 28, 2017
 
-@author: longgu
+@author: Xueping
 '''
 
 from sklearn.datasets import fetch_20newsgroups
