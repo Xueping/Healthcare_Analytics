@@ -1,7 +1,7 @@
 '''
 Created on Jun 29, 2017
 
-@author: longgu
+@author: Xueping
 '''
 
 from sklearn.decomposition import LatentDirichletAllocation
