@@ -1,7 +1,7 @@
 '''
 Created on Jun 30, 2017
 
-@author: longgu
+@author: Xueping
 '''
 
 import codecs
